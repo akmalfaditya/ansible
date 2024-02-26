@@ -1,0 +1,11 @@
+<virtualhost *:80>
+  #servername {{ domain }}
+  documentroot /var/www/html/opensid
+  directoryindex index.html index.php
+  <directory /var/www/html/opensid>
+    Options Indexes FollowSymLinks MultiViews
+    AllowOverride All
+    Require all granted
+  </directory>
+
+</virtualhost>

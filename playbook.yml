@@ -1,0 +1,104 @@
+---
+
+- hosts: all
+  become: true
+  vars_files:
+       - group_vars/ubuntusetup
+  tasks:
+       - name: apt Update & upgrade
+         apt:
+           update_cache: yes
+           upgrade: yes
+       - name: install apache2
+         apt:
+             update_cache: yes
+             name: apache2
+             state: present
+       - name: install php
+         apt:
+           name:
+              - php
+              - php-mysql
+              - php-fpm
+              - php-common
+              - php-gd
+              - php-cli
+              - libapache2-mod-php
+           update_cache: yes
+           state: present
+       - name: create virtual host
+         template:
+           src: "./virtual.conf.tmpl"
+           dest: "/etc/apache2/sites-available/opensid.conf"
+           owner: "{{owner}}"
+           group: "{{group}}"
+       - name: enable new site virtual host
+         shell: /usr/sbin/a2ensite opensid.conf
+       - name: Reload Apache
+         service:
+            name: apache2
+            state: reloaded
+       - name: Remove default virtual host
+         shell: /usr/sbin/a2dissite 000-default.conf
+       - name: Reload Apache
+         service:
+            name: apache2
+            state: reloaded
+       - name: install mysql
+         apt:
+            update_cache: yes
+            name:
+              - mariadb-server
+              - python3-pymysql
+              - mariadb-client
+            state: present
+       - name: "update root password"
+         ignore_errors: true
+         mysql_user:
+           login_unix_socket: /var/run/mysqld/mysqld.sock
+           login_user: "root"
+           login_password: ""
+           name: "root"
+           password: "{{mysql_root_password}}"
+           host_all: true
+       - name: remove user anonymous
+         mysql_user:
+           login_user: "root"
+           login_password: "{{mysql_root_password}}"
+           name: ""
+           password: ""
+           host_all: true
+           state: absent
+       - name: create database
+         mysql_db:
+           login_user: "root"
+           login_password: "{{mysql_root_password}}"
+           name: "{{mysql_db}}"
+           state: present
+       - name: create user
+         mysql_user:
+           login_user: "root"
+           login_password: "{{mysql_root_password}}"
+           name: "{{mysql_user}}"
+           password: "{{mysql_password}}"
+           state: present
+           host: "%"
+           priv: "{{mysql_db}}.*:ALL"
+       - name: clone github repo opensid modified
+         git:
+           repo: "{{git_url}}"
+           dest: /var/www/html/opensid
+           clone: yes
+           update: yes
+       - name: kepemilikan direktori
+         file:
+           path: "/var/www/html/opensid"
+           owner: "{{ansible_user}}"
+           group: "www-data"
+           recurse: yes
+       - name: hak akses direktori
+         file:
+           path: "/var/www/html/opensid"
+           mode: "0775"
+           recurse: yes
+

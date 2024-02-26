@@ -1,0 +1,11 @@
+---
+
+port: "80"
+owner: "www-data"
+group: "www-data"
+domain: "example.com"
+mysql_root_password: "opensidjaya12345"
+mysql_db: "opensid"
+mysql_user: "opensid"
+mysql_password: "opensidjaya12345"
+git_url: "https://github.com/akmalfaditya/opensid.git"

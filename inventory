@@ -1,0 +1,6 @@
+[all:vars]
+ansible_user=root
+ansible_ssh_private_key_file=/home/akmal/.ssh/mykey1
+
+[webserver]
+206.189.34.96
